@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Criar conta{% endblock %}
+
+{% block content %}
+    <section class="event-detail">
+        <h1 class="page-title">Criar conta</h1>
+
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+
+            {% if form.errors %}
+                <div class="alert error">
+                    Verifique os dados informados.
+                </div>
+            {% endif %}
+
+            <div>
+                <label for="{{ form.username.id_for_label }}">Usuário</label>
+                {{ form.username }}
+                {{ form.username.errors }}
+            </div>
+
+            <div>
+                <label for="{{ form.first_name.id_for_label }}">Nome</label>
+                {{ form.first_name }}
+                {{ form.first_name.errors }}
+            </div>
+
+            <div>
+                <label for="{{ form.last_name.id_for_label }}">Sobrenome</label>
+                {{ form.last_name }}
+                {{ form.last_name.errors }}
+            </div>
+
+            <div>
+                <label for="{{ form.email.id_for_label }}">E-mail</label>
+                {{ form.email }}
+                {{ form.email.errors }}
+            </div>
+
+            <div>
+                <label for="{{ form.password1.id_for_label }}">Senha</label>
+                {{ form.password1 }}
+                {{ form.password1.errors }}
+            </div>
+
+            <div>
+                <label for="{{ form.password2.id_for_label }}">Confirmar senha</label>
+                {{ form.password2 }}
+                {{ form.password2.errors }}
+            </div>
+
+            <button type="submit" class="button">
+                Criar conta
+            </button>
+        </form>
+
+        <p style="margin-top: 16px;">
+            Já tem conta?
+            <a href="{% url 'users:login' %}">Entrar</a>
+        </p>
+    </section>
+{% endblock %}

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <title>
+      {% block title %}
+        Ticket Platform
+      {% endblock %}
+    </title>
+
+    <style>
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #f4f6f8;
+        color: #222;
+      }
+      
+      header {
+        background: #111827;
+        color: white;
+        padding: 20px 40px;
+      }
+      
+      header h1 {
+        margin: 0;
+        font-size: 24px;
+      }
+      
+      nav {
+        margin-top: 8px;
+      }
+      
+      nav a {
+        color: #d1d5db;
+        text-decoration: none;
+        margin-right: 16px;
+      }
+      
+      nav a:hover {
+        color: white;
+      }
+      
+      main {
+        padding: 40px;
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+      
+      .page-title {
+        margin-bottom: 24px;
+      }
+      
+      .events-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 24px;
+      }
+      
+      .event-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      }
+      
+      .event-card img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+        display: block;
+      }
+      
+      .event-card-content {
+        padding: 20px;
+      }
+      
+      .event-card h2 {
+        margin-top: 0;
+        margin-bottom: 8px;
+        font-size: 20px;
+      }
+      
+      .event-meta {
+        font-size: 14px;
+        color: #555;
+        margin-bottom: 12px;
+      }
+      
+      .event-description {
+        font-size: 15px;
+        color: #333;
+      }
+      
+      .empty-message {
+        background: white;
+        padding: 24px;
+        border-radius: 12px;
+        color: #555;
+      }
+      
+      .button {
+        display: inline-block;
+        background: #2563eb;
+        color: white;
+        padding: 10px 16px;
+        border-radius: 8px;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        margin-top: 12px;
+      }
+      
+      .button:hover {
+        background: #1d4ed8;
+      }
+      
+      .button:disabled {
+        background: #9ca3af;
+        cursor: not-allowed;
+      }
+      
+      .event-detail {
+        background: white;
+        padding: 32px;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      }
+      
+      .event-detail-banner {
+        width: 100%;
+        max-height: 360px;
+        object-fit: cover;
+        border-radius: 12px;
+        margin-bottom: 24px;
+      }
+      
+      .ticket-list {
+        display: grid;
+        gap: 16px;
+        margin-top: 16px;
+      }
+      
+      .ticket-item {
+        border: 1px solid #e5e7eb;
+        padding: 20px;
+        border-radius: 10px;
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        align-items: center;
+      }
+      
+      .ticket-item h3 {
+        margin-top: 0;
+      }
+      
+      .sold-out {
+        color: #dc2626;
+        font-weight: bold;
+      }
+      
+      .buy-form {
+        display: grid;
+        gap: 8px;
+        min-width: 160px;
+      }
+      
+      .buy-form input {
+        padding: 8px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+      }
+      
+      .alert {
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 16px;
+        background: #e5e7eb;
+      }
+      
+      .alert.success {
+        background: #dcfce7;
+        color: #166534;
+      }
+      
+      .alert.error {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      
+      .order-summary {
+        margin-top: 24px;
+      }
+      
+      .link-button {
+        background: none;
+        border: none;
+        color: #d1d5db;
+        cursor: pointer;
+        font-size: 16px;
+        padding: 0;
+        margin-left: 16px;
+      }
+      
+      .link-button:hover {
+        color: white;
+      }
+      
+      .auth-form {
+        display: grid;
+        gap: 16px;
+        max-width: 520px;
+      }
+      
+      .auth-form div {
+        display: grid;
+        gap: 6px;
+      }
+      
+      .auth-form input {
+        padding: 10px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+      }
+      
+      .auth-form ul {
+        margin: 4px 0 0;
+        padding-left: 18px;
+        color: #991b1b;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Ticket Platform</h1>
+      <nav>
+        <a href="{% url 'events:event_list' %}">Eventos</a>
+
+        {% if user.is_authenticated %}
+          <span>Olá, {{ user.first_name|default:user.username }}</span>
+
+          <form method="post" action="{% url 'users:logout' %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="link-button">Sair</button>
+          </form>
+        {% else %}
+          <a href="{% url 'users:login' %}">Entrar</a>
+          <a href="{% url 'users:register' %}">Criar conta</a>
+        {% endif %}
+
+        {% if user.is_staff %}
+          <a href="/admin/">Admin</a>
+        {% endif %}
+      </nav>
+    </header>
+
+    <main>
+      {% block content %}
+
+      {% endblock %}
+    </main>
+  </body>
+</html>

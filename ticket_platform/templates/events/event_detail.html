@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ event.title }}{% endblock %}
+
+{% block content %}
+    <section class="event-detail">
+        {% if event.banner %}
+            <img class="event-detail-banner" src="{{ event.banner.url }}" alt="{{ event.title }}">
+        {% endif %}
+
+        <h1 class="page-title">{{ event.title }}</h1>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="event-meta">
+            <p><strong>Data:</strong> {{ event.date|date:"d/m/Y H:i" }}</p>
+            <p><strong>Local:</strong> {{ event.location }}</p>
+        </div>
+
+        <p class="event-description">
+            {{ event.description }}
+        </p>
+
+        <h2>Ingressos disponíveis</h2>
+
+        {% if event.tickets.all %}
+            <div class="ticket-list">
+                {% for ticket_type in event.tickets.all %}
+                    <div class="ticket-item">
+                        <div>
+                            <h3>{{ ticket_type.name }}</h3>
+                            <p>Preço: R$ {{ ticket_type.price }}</p>
+                            <p>Disponíveis: {{ ticket_type.available }}</p>
+                        </div>
+
+                        {% if ticket_type.available > 0 %}
+                            <form method="post" action="{% url 'orders:create_order' %}" class="buy-form">
+                                {% csrf_token %}
+                                <input type="hidden" name="ticket_type_id" value="{{ ticket_type.id }}">
+
+                                <label for="quantity-{{ ticket_type.id }}">Quantidade</label>
+                                <input
+                                    id="quantity-{{ ticket_type.id }}"
+                                    type="number"
+                                    name="quantity"
+                                    value="1"
+                                    min="1"
+                                    max="{{ ticket_type.available }}"
+                                    required
+                                >
+
+                                <button class="button" type="submit">
+                                    Comprar
+                                </button>
+                            </form>
+                        {% else %}
+                            <span class="sold-out">Esgotado</span>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-message">
+                Nenhum tipo de ingresso cadastrado para este evento.
+            </div>
+        {% endif %}
+
+        <p style="margin-top: 24px;">
+            <a href="{% url 'events:event_list' %}">← Voltar para eventos</a>
+        </p>
+    </section>
+{% endblock %}

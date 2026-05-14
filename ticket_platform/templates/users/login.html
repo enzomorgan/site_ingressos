@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Entrar{% endblock %}
+
+{% block content %}
+    <section class="event-detail">
+        <h1 class="page-title">Entrar</h1>
+
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+
+            {% if form.errors %}
+                <div class="alert error">
+                    Usuário ou senha inválidos.
+                </div>
+            {% endif %}
+
+            <div>
+                <label for="{{ form.username.id_for_label }}">Usuário</label>
+                {{ form.username }}
+            </div>
+
+            <div>
+                <label for="{{ form.password.id_for_label }}">Senha</label>
+                {{ form.password }}
+            </div>
+
+            <button type="submit" class="button">
+                Entrar
+            </button>
+        </form>
+
+        <p style="margin-top: 16px;">
+            Ainda não tem conta?
+            <a href="{% url 'users:register' %}">Criar conta</a>
+        </p>
+    </section>
+{% endblock %}

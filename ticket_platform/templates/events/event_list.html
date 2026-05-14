@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Eventos disponíveis{% endblock %}
+
+{% block content %}
+    <section>
+        <h1 class="page-title">Eventos disponíveis</h1>
+
+        {% if events %}
+            <div class="events-grid">
+                {% for event in events %}
+                    <article class="event-card">
+                        {% if event.banner %}
+                            <img src="{{ event.banner.url }}" alt="{{ event.title }}">
+                        {% endif %}
+
+                        <div class="event-card-content">
+                            <h2>{{ event.title }}</h2>
+
+                            <div class="event-meta">
+                                <p><strong>Data:</strong> {{ event.date|date:"d/m/Y H:i" }}</p>
+                                <p><strong>Local:</strong> {{ event.location }}</p>
+                            </div>
+
+                            <p class="event-description">
+                                {{ event.description|truncatewords:25 }}
+                            </p>
+
+                            <a class="button" href="{% url 'events:event_detail' event.slug %}">
+                                Ver detalhes
+                            </a>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-message">
+                Nenhum evento disponível no momento.
+            </div>
+        {% endif %}
+    </section>
+{% endblock %}
