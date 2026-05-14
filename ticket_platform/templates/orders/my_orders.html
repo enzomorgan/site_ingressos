@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Meus pedidos{% endblock %}
+
+{% block content %}
+    <section class="event-detail">
+        <h1 class="page-title">Meus pedidos</h1>
+
+        {% if orders %}
+            <div class="ticket-list">
+                {% for order in orders %}
+                    <div class="ticket-item">
+                        <div>
+                            <h3>Pedido #{{ order.id }}</h3>
+                            <p><strong>Status:</strong> {{ order.get_status_display }}</p>
+                            <p><strong>Total:</strong> R$ {{ order.total }}</p>
+                            <p><strong>Data:</strong> {{ order.created_at|date:"d/m/Y H:i" }}</p>
+
+                            <h4>Itens</h4>
+
+                            {% for item in order.items.all %}
+                                <p>
+                                    {{ item.quantity }}x {{ item.ticket_type.name }}
+                                    - {{ item.ticket_type.event.title }}
+                                </p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-message">
+                Você ainda não possui pedidos.
+            </div>
+        {% endif %}
+    </section>
+{% endblock %}

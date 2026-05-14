@@ -1,0 +1,46 @@
+{% extends 'dashboard/base_dashboard.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h2>Dashboard</h2>
+    </div>
+
+    <div class="cards">
+        <div class="card">
+            <span>Total de eventos</span>
+            <strong>{{ total_events }}</strong>
+        </div>
+
+        <div class="card">
+            <span>Eventos ativos</span>
+            <strong>{{ active_events }}</strong>
+        </div>
+
+        <div class="card">
+            <span>Total de pedidos</span>
+            <strong>{{ total_orders }}</strong>
+        </div>
+
+        <div class="card">
+            <span>Pedidos pendentes</span>
+            <strong>{{ pending_orders }}</strong>
+        </div>
+
+        <div class="card">
+            <span>Pedidos pagos</span>
+            <strong>{{ paid_orders }}</strong>
+        </div>
+
+        <div class="card">
+            <span>Ingressos gerados</span>
+            <strong>{{ total_tickets }}</strong>
+        </div>
+
+        <div class="card">
+            <span>Check-ins realizados</span>
+            <strong>{{ checked_in_tickets }}</strong>
+        </div>
+    </div>
+{% endblock %}

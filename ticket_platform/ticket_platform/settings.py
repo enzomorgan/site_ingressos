@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'tickets.apps.TicketsConfig',
     'orders.apps.OrdersConfig',
     'payments.apps.PaymentsConfig',
+    'dashboard.apps.DashboardConfig',
 ]
 
 MIDDLEWARE = [

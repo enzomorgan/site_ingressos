@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Meus ingressos{% endblock %}
+
+{% block content %}
+    <section class="event-detail">
+        <h1 class="page-title">Meus ingressos</h1>
+
+        {% if tickets %}
+            <div class="ticket-list">
+                {% for ticket in tickets %}
+                    <div class="ticket-item">
+                        <div>
+                            <h3>Ingresso #{{ ticket.id }}</h3>
+
+                            {% with item=ticket.order.items.first %}
+                                {% if item %}
+                                    <p><strong>Evento:</strong> {{ item.ticket_type.event.title }}</p>
+                                    <p><strong>Ingresso:</strong> {{ item.ticket_type.name }}</p>
+                                    <p><strong>Data:</strong> {{ item.ticket_type.event.date|date:"d/m/Y H:i" }}</p>
+                                    <p><strong>Local:</strong> {{ item.ticket_type.event.location }}</p>
+                                {% endif %}
+                            {% endwith %}
+
+                            <p><strong>Código:</strong> {{ ticket.code }}</p>
+                            <p><strong>Check-in:</strong> {% if ticket.checked_in %}Realizado{% else %}Pendente{% endif %}</p>
+
+                            {% if ticket.qr_code %}
+                                <p>
+                                    <img src="{{ ticket.qr_code.url }}" alt="QR Code do ingresso" style="max-width: 160px;">
+                                </p>
+                            {% endif %}
+
+                            {% if ticket.pdf_file %}
+                                <p>
+                                    <a class="button" href="{{ ticket.pdf_file.url }}" target="_blank">
+                                        Baixar PDF
+                                    </a>
+                                </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-message">
+                Você ainda não possui ingressos disponíveis.
+                Os ingressos aparecerão aqui quando o pagamento for confirmado.
+            </div>
+        {% endif %}
+    </section>
+{% endblock %}

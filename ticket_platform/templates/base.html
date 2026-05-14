@@ -239,6 +239,14 @@
         <a href="{% url 'events:event_list' %}">Eventos</a>
 
         {% if user.is_authenticated %}
+          {% if user.is_staff %}
+            <a href="{% url 'dashboard:home' %}">Painel</a>
+            <a href="/admin/">Admin Técnico</a>
+          {% else %}
+            <a href="{% url 'orders:my_orders' %}">Meus pedidos</a>
+            <a href="{% url 'tickets:my_tickets' %}">Meus ingressos</a>
+          {% endif %}
+
           <span>Olá, {{ user.first_name|default:user.username }}</span>
 
           <form method="post" action="{% url 'users:logout' %}" style="display:inline;">
@@ -248,10 +256,6 @@
         {% else %}
           <a href="{% url 'users:login' %}">Entrar</a>
           <a href="{% url 'users:register' %}">Criar conta</a>
-        {% endif %}
-
-        {% if user.is_staff %}
-          <a href="/admin/">Admin</a>
         {% endif %}
       </nav>
     </header>
