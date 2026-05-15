@@ -1,0 +1,69 @@
+{% extends 'dashboard/base_dashboard.html' %}
+
+{% block title %}Evento{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        {% if object %}
+            <h2>Editar evento</h2>
+        {% else %}
+            <h2>Novo evento</h2>
+        {% endif %}
+
+        <a class="button" href="{% url 'dashboard:event_list' %}">
+            Voltar
+        </a>
+    </div>
+
+    <div class="table-card">
+        <form method="post" enctype="multipart/form-data" class="dashboard-form">
+            {% csrf_token %}
+
+            {% if form.errors %}
+                <div class="alert error">
+                    Verifique os campos informados.
+                </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label for="{{ form.title.id_for_label }}">Título</label>
+                {{ form.title }}
+                {{ form.title.errors }}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.description.id_for_label }}">Descrição</label>
+                {{ form.description }}
+                {{ form.description.errors }}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.date.id_for_label }}">Data e hora</label>
+                {{ form.date }}
+                {{ form.date.errors }}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.location.id_for_label }}">Local</label>
+                {{ form.location }}
+                {{ form.location.errors }}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.banner.id_for_label }}">Banner</label>
+                {{ form.banner }}
+                {{ form.banner.errors }}
+            </div>
+
+            <div class="form-group-check">
+                {{ form.active }}
+                <label for="{{ form.active.id_for_label }}">Evento ativo</label>
+                {{ form.active.errors }}
+            </div>
+
+            <button type="submit" class="button button-success">
+                Salvar evento
+            </button>
+        </form>
+    </div>
+{% endblock %}

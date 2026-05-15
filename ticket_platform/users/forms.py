@@ -33,6 +33,6 @@ class CustomerRegisterForm(UserCreationForm):
         email = self.cleaned_data.get('email')
             
         if User.objects.filter(email=email).exists():
-            raise forms.ValidationError('Já existe uma conta com esse e-amil.')
+            raise forms.ValidationError('Já existe uma conta com esse e-mail.')
             
         return email

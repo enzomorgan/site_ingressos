@@ -82,7 +82,7 @@ class OrderSuccessView(LoginRequiredMixin, DetailView):
 class MyOrderView(LoginRequiredMixin, ListView):
     model = Order
     template_name = 'orders/my_orders.html'
-    content_type_name = 'orders'
+    content_object_name = 'orders'
     login_url = '/login'
     
     def get_queryset(self):

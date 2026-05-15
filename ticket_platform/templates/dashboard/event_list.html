@@ -1,0 +1,72 @@
+{% extends 'dashboard/base_dashboard.html' %}
+
+{% block title %}Eventos{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h2>Eventos</h2>
+
+        <a class="button" href="{% url 'dashboard:event_create' %}">
+            Novo evento
+        </a>
+    </div>
+
+    <div class="table-card">
+        {% if events %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Evento</th>
+                        <th>Data</th>
+                        <th>Local</th>
+                        <th>Status</th>
+                        <th>Tipos de ingresso</th>
+                        <th>Criado por</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for event in events %}
+                        <tr>
+                            <td>
+                                <strong>{{ event.title }}</strong><br>
+                                <small>{{ event.slug }}</small>
+                            </td>
+
+                            <td>{{ event.date|date:"d/m/Y H:i" }}</td>
+
+                            <td>{{ event.location }}</td>
+
+                            <td>
+                                {% if event.active %}
+                                    <span class="badge badge-paid">Ativo</span>
+                                {% else %}
+                                    <span class="badge badge-canceled">Inativo</span>
+                                {% endif %}
+                            </td>
+
+                            <td>{{ event.tickets.count }}</td>
+
+                            <td>
+                                {% if event.created_by %}
+                                    {{ event.created_by.username }}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                <a class="button" href="{% url 'dashboard:event_update' event.id %}">
+                                    Editar
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Nenhum evento cadastrado.</p>
+        {% endif %}
+    </div>
+{% endblock %}

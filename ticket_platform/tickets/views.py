@@ -6,7 +6,7 @@ class MyTicketsView(LoginRequiredMixin, ListView):
     model = Ticket
     template_name = 'tickets/my_tickets.html'
     context_object_name = 'tickets'
-    login_url = '/login'
+    login_url = '/login/'
     
     def get_queryset(self):
         return Ticket.objects.filter(

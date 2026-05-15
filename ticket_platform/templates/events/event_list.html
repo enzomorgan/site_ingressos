@@ -2,9 +2,53 @@
 
 {% block title %}Eventos disponíveis{% endblock %}
 
+{% block hero %}
+    <section class="hero">
+        <div class="hero-content">
+            <div>
+                <span class="hero-kicker">Ingressos online</span>
+                <h1>Encontre eventos e garanta seu ingresso com praticidade.</h1>
+                <p>
+                    Veja eventos disponíveis, escolha seu ingresso e acompanhe seus pedidos
+                    diretamente pela sua conta.
+                </p>
+
+                {% if not user.is_authenticated %}
+                    <a class="button" href="{% url 'users:register' %}">
+                        Criar conta
+                    </a>
+                    <a class="button button-secondary" href="{% url 'users:login' %}">
+                        Entrar
+                    </a>
+                {% else %}
+                    {% if user.is_staff %}
+                        <a class="button" href="{% url 'dashboard:home' %}">
+                            Acessar painel
+                        </a>
+                    {% else %}
+                        <a class="button" href="{% url 'orders:my_orders' %}">
+                            Meus pedidos
+                        </a>
+                    {% endif %}
+                {% endif %}
+            </div>
+
+            <div class="hero-card">
+                <strong>{{ events|length }}</strong>
+                <span>evento(s) disponível(is) agora</span>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
 {% block content %}
     <section>
-        <h1 class="page-title">Eventos disponíveis</h1>
+        <div class="section-header">
+            <div>
+                <h1 class="page-title">Eventos em destaque</h1>
+                <p>Escolha um evento e veja os ingressos disponíveis.</p>
+            </div>
+        </div>
 
         {% if events %}
             <div class="events-grid">
@@ -12,6 +56,10 @@
                     <article class="event-card">
                         {% if event.banner %}
                             <img src="{{ event.banner.url }}" alt="{{ event.title }}">
+                        {% else %}
+                            <div class="event-card-placeholder">
+                                {{ event.title|truncatechars:18 }}
+                            </div>
                         {% endif %}
 
                         <div class="event-card-content">
@@ -23,11 +71,11 @@
                             </div>
 
                             <p class="event-description">
-                                {{ event.description|truncatewords:25 }}
+                                {{ event.description|truncatewords:22 }}
                             </p>
 
                             <a class="button" href="{% url 'events:event_detail' event.slug %}">
-                                Ver detalhes
+                                Ver ingressos
                             </a>
                         </div>
                     </article>

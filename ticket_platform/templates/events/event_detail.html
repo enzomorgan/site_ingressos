@@ -40,52 +40,31 @@
                         </div>
 
                         {% if ticket_type.available > 0 %}
-    {% if user.is_staff %}
-        <span class="sold-out">
-            Admin não compra ingressos
-        </span>
-    {% else %}
-        <form method="post" action="{% url 'orders:create_order' %}" class="buy-form">
-            {% csrf_token %}
-            <input type="hidden" name="ticket_type_id" value="{{ ticket_type.id }}">
+                            {% if user.is_staff %}
+                                <span class="sold-out">
+                                    Admin não compra ingressos
+                                </span>
+                            {% else %}
+                                <form method="post" action="{% url 'orders:create_order' %}" class="buy-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="ticket_type_id" value="{{ ticket_type.id }}">
 
-            <label for="quantity-{{ ticket_type.id }}">Quantidade</label>
-            <input
-                id="quantity-{{ ticket_type.id }}"
-                type="number"
-                name="quantity"
-                value="1"
-                min="1"
-                max="{{ ticket_type.available }}"
-                required
-            >
+                                    <label for="quantity-{{ ticket_type.id }}">Quantidade</label>
+                                    <input
+                                        id="quantity-{{ ticket_type.id }}"
+                                        type="number"
+                                        name="quantity"
+                                        value="1"
+                                        min="1"
+                                        max="{{ ticket_type.available }}"
+                                        required
+                                    >
 
-            <button class="button" type="submit">
-                Comprar
-            </button>
-        </form>
-    {% endif %}
-{% else %}
-    <span class="sold-out">Esgotado</span>
-{% endif %}
-                                {% csrf_token %}
-                                <input type="hidden" name="ticket_type_id" value="{{ ticket_type.id }}">
-
-                                <label for="quantity-{{ ticket_type.id }}">Quantidade</label>
-                                <input
-                                    id="quantity-{{ ticket_type.id }}"
-                                    type="number"
-                                    name="quantity"
-                                    value="1"
-                                    min="1"
-                                    max="{{ ticket_type.available }}"
-                                    required
-                                >
-
-                                <button class="button" type="submit">
-                                    Comprar
-                                </button>
-                            </form>
+                                    <button class="button" type="submit">
+                                        Comprar
+                                    </button>
+                                </form>
+                            {% endif %}
                         {% else %}
                             <span class="sold-out">Esgotado</span>
                         {% endif %}
