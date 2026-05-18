@@ -22,7 +22,8 @@ class Ticket(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.qr_code:
-            qr_buffer = generate_qr_code(str(self.code))
+            qr_data = f'/painel/checkin/{self.code}/'
+            qr_buffer = generate_qr_code(qr_data)
             self.qr_code.save(f"{self.code}.png", File(qr_buffer), save=False)
 
         super().save(*args, **kwargs)

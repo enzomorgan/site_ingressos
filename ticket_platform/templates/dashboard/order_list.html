@@ -1,81 +1,84 @@
 {% extends 'dashboard/base_dashboard.html' %}
 
-{% block title %}Pedidos{% endblock %}
+{% block title %}
+  Pedidos
+{% endblock %}
 
 {% block content %}
-    <div class="page-header">
-        <h2>Pedidos</h2>
-    </div>
+  <div class="page-header">
+    <h2>Pedidos</h2>
+  </div>
 
-    <div class="table-card">
-        {% if orders %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>Pedido</th>
-                        <th>Cliente</th>
-                        <th>Itens</th>
-                        <th>Status</th>
-                        <th>Total</th>
-                        <th>Ingressos</th>
-                        <th>Data</th>
-                        <th>Ação</th>
-                    </tr>
-                </thead>
+  <div class="table-card">
+    {% if orders %}
+      <table>
+        <thead>
+          <tr>
+            <th>Pedido</th>
+            <th>Cliente</th>
+            <th>Itens</th>
+            <th>Status</th>
+            <th>Total</th>
+            <th>Ingressos</th>
+            <th>Data</th>
+            <th>Ação</th>
+          </tr>
+        </thead>
 
-                <tbody>
-                    {% for order in orders %}
-                        <tr>
-                            <td>#{{ order.id }}</td>
+        <tbody>
+          {% for order in orders %}
+            <tr>
+              <td>#{{ order.id }}</td>
 
-                            <td>
-                                {{ order.user.get_full_name|default:order.user.username }}<br>
-                                <small>{{ order.user.email }}</small>
-                            </td>
+              <td>
+                {{ order.user.get_full_name|default:order.user.username }}<br />
+                <small>{{ order.user.email }}</small>
+              </td>
 
-                            <td>
-                                {% for item in order.items.all %}
-                                    <div>
-                                        {{ item.quantity }}x {{ item.ticket_type.name }}<br>
-                                        <small>{{ item.ticket_type.event.title }}</small>
-                                    </div>
-                                {% endfor %}
-                            </td>
+              <td>
+                {% for item in order.items.all %}
+                  <div>
+                    {{ item.quantity }}x {{ item.ticket_type.name }}<br />
+                    <small>{{ item.ticket_type.event.title }}</small>
+                  </div>
+                {% endfor %}
+              </td>
 
-                            <td>
-                                {% if order.status == 'pending' %}
-                                    <span class="badge badge-pending">Pendente</span>
-                                {% elif order.status == 'paid' %}
-                                    <span class="badge badge-paid">Pago</span>
-                                {% else %}
-                                    <span class="badge badge-canceled">Cancelado</span>
-                                {% endif %}
-                            </td>
+              <td>
+                {% if order.status == 'pending' %}
+                  <span class="badge badge-pending">Pendente</span>
+                {% elif order.status == 'paid' %}
+                  <span class="badge badge-paid">Pago</span>
+                {% else %}
+                  <span class="badge badge-canceled">Cancelado</span>
+                {% endif %}
+              </td>
 
-                            <td>R$ {{ order.total }}</td>
+              <td>R$ {{ order.total }}</td>
 
-                            <td>{{ order.tickets.count }}</td>
+              <td>{{ order.tickets.count }}</td>
 
-                            <td>{{ order.created_at|date:"d/m/Y H:i" }}</td>
+              <td>{{ order.created_at|date:'d/m/Y H:i' }}</td><<td>
+                <a class="button" href="{% url 'dashboard:order_detail' order.id %}">Ver detalhes</a>
 
-                            <td>
-                                {% if order.status == 'pending' %}
-                                    <form method="post" action="{% url 'dashboard:confirm_payment' order.id %}">
-                                        {% csrf_token %}
-                                        <button type="submit" class="button button-success">
-                                            Confirmar pagamento
-                                        </button>
-                                    </form>
-                                {% else %}
-                                    —
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>Nenhum pedido encontrado.</p>
-        {% endif %}
-    </div>
+                {% if order.status == 'pending' %}
+                  <form method="post" action="{% url 'dashboard:confirm_payment' order.id %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="button button-success">Confirmar</button>
+                  </form>
+
+                  <form method="post" action="{% url 'dashboard:cancel_order' order.id %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="button button-danger">Cancelar</button>
+                  </form>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>Nenhum pedido encontrado.</p>
+    {% endif %}
+  </div>
 {% endblock %}

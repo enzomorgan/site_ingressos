@@ -1,0 +1,167 @@
+{% extends 'dashboard/base_dashboard.html' %}
+
+{% block title %}Pedido #{{ order.id }}{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <div>
+            <h2>Pedido #{{ order.id }}</h2>
+            <p>Detalhes completos do pedido</p>
+        </div>
+
+        <a class="button" href="{% url 'dashboard:order_list' %}">
+            Voltar
+        </a>
+    </div>
+
+    <div class="cards">
+        <div class="card">
+            <span>Status</span>
+            <strong>
+                {% if order.status == 'pending' %}
+                    Pendente
+                {% elif order.status == 'paid' %}
+                    Pago
+                {% else %}
+                    Cancelado
+                {% endif %}
+            </strong>
+        </div>
+
+        <div class="card">
+            <span>Total</span>
+            <strong>R$ {{ order.total }}</strong>
+        </div>
+
+        <div class="card">
+            <span>Ingressos gerados</span>
+            <strong>{{ order.tickets.count }}</strong>
+        </div>
+
+        <div class="card">
+            <span>Data</span>
+            <strong style="font-size: 20px;">
+                {{ order.created_at|date:"d/m/Y H:i" }}
+            </strong>
+        </div>
+    </div>
+
+    <br>
+
+    <div class="table-card">
+        <h3>Cliente</h3>
+
+        <p><strong>Nome:</strong> {{ order.user.get_full_name|default:order.user.username }}</p>
+        <p><strong>Usuário:</strong> {{ order.user.username }}</p>
+        <p><strong>E-mail:</strong> {{ order.user.email }}</p>
+    </div>
+
+    <br>
+
+    <div class="table-card">
+        <h3>Itens do pedido</h3>
+
+        {% if order.items.all %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Evento</th>
+                        <th>Ingresso</th>
+                        <th>Quantidade</th>
+                        <th>Preço unitário</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for item in order.items.all %}
+                        <tr>
+                            <td>{{ item.ticket_type.event.title }}</td>
+                            <td>{{ item.ticket_type.name }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>R$ {{ item.price }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Nenhum item neste pedido.</p>
+        {% endif %}
+    </div>
+
+    <br>
+
+    <div class="table-card">
+        <h3>Tickets gerados</h3>
+
+        {% if order.tickets.all %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>QR Code</th>
+                        <th>PDF</th>
+                        <th>Check-in</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for ticket in order.tickets.all %}
+                        <tr>
+                            <td>{{ ticket.code }}</td>
+
+                            <td>
+                                {% if ticket.qr_code %}
+                                    <img src="{{ ticket.qr_code.url }}" alt="QR Code" style="max-width: 90px;">
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if ticket.pdf_file %}
+                                    <a class="button" href="{{ ticket.pdf_file.url }}" target="_blank">
+                                        Abrir PDF
+                                    </a>
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if ticket.checked_in %}
+                                    <span class="badge badge-paid">Realizado</span>
+                                {% else %}
+                                    <span class="badge badge-pending">Pendente</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Nenhum ticket gerado ainda.</p>
+        {% endif %}
+    </div>
+
+    <br>
+
+    {% if order.status == 'pending' %}
+        <div class="table-card">
+            <h3>Ações</h3>
+
+            <form method="post" action="{% url 'dashboard:confirm_payment' order.id %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="button button-success">
+                    Confirmar pagamento e gerar ingressos
+                </button>
+            </form>
+
+            <form method="post" action="{% url 'dashboard:cancel_order' order.id %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="button button-danger">
+                    Cancelar pedido
+                </button>
+            </form>
+        </div>
+    {% endif %}
+{% endblock %}

@@ -1,5 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import ListView
+from django.views.generic import DetailView, ListView
 from .models import Ticket
 
 class MyTicketsView(LoginRequiredMixin, ListView):
@@ -18,3 +18,26 @@ class MyTicketsView(LoginRequiredMixin, ListView):
             'order__items__ticket_type',
             'order__items__ticket_type__event'
         ).order_by('-created_at')
+        
+class TicketDetailView(LoginRequiredMixin, DetailView):
+    model = Ticket
+    template_name = 'tickets/ticket_detail.html'
+    context_object_name = 'ticket'
+    login_url = '/login/'
+    
+    def get_queryset(self):
+        return Ticket.objects.filter(
+            order__user=self.request.user
+        ).select_related(
+            'order',
+            'order__user'
+        ).prefetch_related(
+            'order__items',
+            'order__items__ticket_type',
+            'order__items__ticket_type__event'
+        )
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['item'] = self.object.order.items.first()
+        return context

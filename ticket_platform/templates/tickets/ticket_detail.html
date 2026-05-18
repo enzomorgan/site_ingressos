@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Meu ingresso{% endblock %}
+
+{% block content %}
+    <section class="event-detail">
+        <h1 class="page-title">Meu ingresso</h1>
+
+        {% if item %}
+            <div class="event-meta">
+                <p><strong>Evento:</strong> {{ item.ticket_type.event.title }}</p>
+                <p><strong>Tipo de ingresso:</strong> {{ item.ticket_type.name }}</p>
+                <p><strong>Data:</strong> {{ item.ticket_type.event.date|date:"d/m/Y H:i" }}</p>
+                <p><strong>Local:</strong> {{ item.ticket_type.event.location }}</p>
+            </div>
+        {% endif %}
+
+        <div class="ticket-detail-card">
+            <div>
+                <h2>Código do ingresso</h2>
+                <p>{{ ticket.code }}</p>
+
+                <p>
+                    <strong>Status:</strong>
+                    {% if ticket.checked_in %}
+                        <span class="status status-paid">Check-in realizado</span>
+                    {% else %}
+                        <span class="status status-pending">Check-in pendente</span>
+                    {% endif %}
+                </p>
+
+                {% if ticket.pdf_file %}
+                    <a class="button" href="{{ ticket.pdf_file.url }}" target="_blank">
+                        Baixar PDF
+                    </a>
+                {% endif %}
+
+                <a class="button" href="{% url 'tickets:my_tickets' %}">
+                    Voltar
+                </a>
+            </div>
+
+            <div class="ticket-qr-area">
+                {% if ticket.qr_code %}
+                    <img src="{{ ticket.qr_code.url }}" alt="QR Code do ingresso">
+                {% else %}
+                    <p>QR Code não disponível.</p>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+{% endblock %}

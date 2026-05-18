@@ -1,0 +1,79 @@
+{% extends 'dashboard/base_dashboard.html' %}
+
+{% block title %}Resultado do check-in{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <div>
+            <h2>Resultado do check-in</h2>
+            <p>Validação do ingresso</p>
+        </div>
+
+        <a class="button" href="{% url 'dashboard:checkin_search' %}">
+            Validar outro ingresso
+        </a>
+    </div>
+
+    <div class="table-card">
+        {% if status == 'success' %}
+            <div class="checkin-result checkin-success">
+                <h2>Entrada liberada</h2>
+                <p>{{ message }}</p>
+            </div>
+        {% elif status == 'used' %}
+            <div class="checkin-result checkin-used">
+                <h2>Ingresso já utilizado</h2>
+                <p>{{ message }}</p>
+            </div>
+        {% else %}
+            <div class="checkin-result checkin-invalid">
+                <h2>Ingresso inválido</h2>
+                <p>{{ message }}</p>
+            </div>
+        {% endif %}
+    </div>
+
+    {% if ticket %}
+        <br>
+
+        <div class="table-card">
+            <h3>Dados do ingresso</h3>
+
+            <p><strong>Código:</strong> {{ ticket.code }}</p>
+            <p>
+                <strong>Status:</strong>
+                {% if ticket.checked_in %}
+                    <span class="badge badge-paid">Check-in realizado</span>
+                {% else %}
+                    <span class="badge badge-pending">Pendente</span>
+                {% endif %}
+            </p>
+
+            {% if item %}
+                <p><strong>Evento:</strong> {{ item.ticket_type.event.title }}</p>
+                <p><strong>Tipo de ingresso:</strong> {{ item.ticket_type.name }}</p>
+                <p><strong>Data:</strong> {{ item.ticket_type.event.date|date:"d/m/Y H:i" }}</p>
+                <p><strong>Local:</strong> {{ item.ticket_type.event.location }}</p>
+            {% endif %}
+        </div>
+
+        <br>
+
+        <div class="table-card">
+            <h3>Cliente</h3>
+
+            <p><strong>Nome:</strong> {{ ticket.order.user.get_full_name|default:ticket.order.user.username }}</p>
+            <p><strong>Usuário:</strong> {{ ticket.order.user.username }}</p>
+            <p><strong>E-mail:</strong> {{ ticket.order.user.email }}</p>
+        </div>
+
+        {% if ticket.qr_code %}
+            <br>
+
+            <div class="table-card">
+                <h3>QR Code</h3>
+                <img src="{{ ticket.qr_code.url }}" alt="QR Code" style="max-width: 180px;">
+            </div>
+        {% endif %}
+    {% endif %}
+{% endblock %}

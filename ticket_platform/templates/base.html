@@ -505,6 +505,40 @@
         margin: 4px 0 0;
         padding-left: 18px;
       }
+      .ticket-detail-card {
+        display: grid;
+        grid-template-columns: 1fr 260px;
+        gap: 24px;
+        align-items: center;
+        margin-top: 24px;
+        padding: 24px;
+        background: #f8fafc;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+      }
+      
+      .ticket-detail-card h2 {
+        margin-top: 0;
+      }
+      
+      .ticket-qr-area {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 18px;
+        text-align: center;
+      }
+      
+      .ticket-qr-area img {
+        max-width: 220px;
+        width: 100%;
+      }
+      
+      @media (max-width: 760px) {
+        .ticket-detail-card {
+          grid-template-columns: 1fr;
+        }
+      }
     </style>
   </head>
   <body>
@@ -542,10 +576,12 @@
 
     <main>
       {% block hero %}
+
       {% endblock %}
 
       <div class="container">
         {% block content %}
+
         {% endblock %}
       </div>
     </main>

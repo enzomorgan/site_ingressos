@@ -1,0 +1,46 @@
+{% extends 'dashboard/base_dashboard.html' %}
+
+{% block title %}Check-in{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <div>
+            <h2>Check-in</h2>
+            <p>Valide ingressos pelo código do QR Code</p>
+        </div>
+    </div>
+
+    <div class="table-card">
+        <form method="get" onsubmit="goToCheckin(event)" class="dashboard-form">
+            <div class="form-group">
+                <label for="ticket-code">Código do ingresso</label>
+                <input
+                    id="ticket-code"
+                    class="form-control"
+                    type="text"
+                    placeholder="Cole ou escaneie o código do ingresso"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="button button-success">
+                Validar ingresso
+            </button>
+        </form>
+    </div>
+
+    <script>
+        function goToCheckin(event) {
+            event.preventDefault();
+
+            const input = document.getElementById('ticket-code');
+            const code = input.value.trim();
+
+            if (!code) {
+                return;
+            }
+
+            window.location.href = `/painel/checkin/${code}/`;
+        }
+    </script>
+{% endblock %}

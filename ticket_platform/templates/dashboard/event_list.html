@@ -60,6 +60,10 @@
                                 <a class="button" href="{% url 'dashboard:event_update' event.id %}">
                                     Editar
                                 </a>
+
+                                <a class="button" href="{% url 'dashboard:ticket_type_list' event.id %}">
+                                    Ingressos
+                                </a>
                             </td>
                         </tr>
                     {% endfor %}
