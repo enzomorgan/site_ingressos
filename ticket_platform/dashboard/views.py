@@ -62,7 +62,7 @@ class DashboardOrderListView(StaffRequiredMixin, ListView):
 class DashboardOrderDetailView(StaffRequiredMixin, DetailView):
     model = Order
     template_name = 'dashboard/order_detail.html'
-    context_type_name = 'order'
+    context_object_name = 'order'
 
     def get_queryset(self):
         return Order.objects.select_related(
@@ -159,7 +159,7 @@ class DashboardEventUpdateView(StaffRequiredMixin, UpdateView):
     
 class DashboardTicketTypeListView(StaffRequiredMixin, ListView):
     model = TicketType
-    template_name = 'dashboard/ticket-list.html'
+    template_name = 'dashboard/ticket_list.html'
     context_object_name = 'ticket_types'
     
     def dispatch(self, request, *args, **kwargs):
@@ -182,7 +182,7 @@ class DashboardTicketTypeCreateView(StaffRequiredMixin, CreateView):
     template_name = 'dashboard/ticket_type_form.html'
     
     def dispatch(self, request, *args, **kwargs):
-        self.event = self.get_context_object_name(Event, pk=kwargs['event_pk'])
+        self.event = get_object_or_404(Event, pk=kwargs['event_pk'])
         return super().dispatch(request, *args, **kwargs)
     
     def form_valid(self, form):
@@ -214,19 +214,19 @@ class DashboardTicketTypeUpdateView(StaffRequiredMixin, UpdateView):
     def get_success_url(self):
         return reverse_lazy(
             'dashboard:ticket_type_list',
-            kwargs={'event_pk': self.object.event}
+            kwargs={'event_pk': self.object.event.pk}
         )
         
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['event'] = self.object.name
+        context['event'] = self.object.event
         return context
     
 class CheckinSearchView(StaffRequiredMixin, TemplateView):
     template_name = 'dashboard/checkin_search.html'
     
-class CheckinValidateView(StaffRequiredMixin, View):
-    template_name = 'dashboard/ckeckin_result.html'
+class CheckinValidateView(StaffRequiredMixin, TemplateView):
+    template_name = 'dashboard/checkin_result.html'
     
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
@@ -236,7 +236,7 @@ class CheckinValidateView(StaffRequiredMixin, View):
         try:
             ticket = Ticket.objects.select_related(
                 'order',
-                'order_user'
+                'order__user'
             ).prefetch_related(
                 'order__items',
                 'order__items__ticket_type',
@@ -249,7 +249,7 @@ class CheckinValidateView(StaffRequiredMixin, View):
             return context
         
         context['ticket'] = ticket
-        context['item'] = ticket.order.first()
+        context['item'] = ticket.order.items.first()
         
         if ticket.checked_in:
             context['status'] = 'used'
