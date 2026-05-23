@@ -11,6 +11,66 @@
         </a>
     </div>
 
+    <div class="cards">
+    <div class="card">
+        <span>Total de eventos</span>
+        <strong>{{ total_events_count }}</strong>
+    </div>
+
+    <div class="card">
+        <span>Eventos ativos</span>
+        <strong>{{ active_events_count }}</strong>
+    </div>
+
+    <div class="card">
+        <span>Eventos inativos</span>
+        <strong>{{ inactive_events_count }}</strong>
+    </div>
+</div>
+
+<br>
+
+<div class="table-card">
+    <form method="get" class="dashboard-filter-form">
+        <div class="form-group">
+            <label for="q">Buscar</label>
+            <input
+                id="q"
+                class="form-control"
+                type="text"
+                name="q"
+                value="{{ search_query }}"
+                placeholder="Título ou local do evento"
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status" class="form-control" name="status">
+                <option value="">Todos</option>
+                <option value="active" {% if selected_status == 'active' %}selected{% endif %}>
+                    Ativos
+                </option>
+                <option value="inactive" {% if selected_status == 'inactive' %}selected{% endif %}>
+                    Inativos
+                </option>
+            </select>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="button">
+                Filtrar
+            </button>
+
+            <a class="button" href="{% url 'dashboard:event_list' %}">
+                Limpar
+            </a>
+        </div>
+    </form>
+</div>
+
+<br>
+
     <div class="table-card">
         {% if events %}
             <table>

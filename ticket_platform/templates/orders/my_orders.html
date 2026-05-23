@@ -12,9 +12,21 @@
                     <div class="ticket-item">
                         <div>
                             <h3>Pedido #{{ order.id }}</h3>
-                            <p><strong>Status:</strong> {{ order.get_status_display }}</p>
+
+                            <p>
+                                <strong>Status:</strong>
+                                {% if order.status == 'pending' %}
+                                    <span class="status status-pending">Aguardando pagamento</span>
+                                {% elif order.status == 'paid' %}
+                                    <span class="status status-paid">Pago</span>
+                                {% else %}
+                                    <span class="status status-canceled">Cancelado</span>
+                                {% endif %}
+                            </p>
+
                             <p><strong>Total:</strong> R$ {{ order.total }}</p>
                             <p><strong>Data:</strong> {{ order.created_at|date:"d/m/Y H:i" }}</p>
+                            <p><strong>Ingressos gerados:</strong> {{ order.tickets.count }}</p>
 
                             <h4>Itens</h4>
 
@@ -24,6 +36,18 @@
                                     - {{ item.ticket_type.event.title }}
                                 </p>
                             {% endfor %}
+
+                            <p>
+                                <a class="button" href="{% url 'orders:my_order_detail' order.id %}">
+                                    Ver detalhes
+                                </a>
+
+                                {% if order.status == 'paid' and order.tickets.count > 0 %}
+                                    <a class="button" href="{% url 'tickets:my_tickets' %}">
+                                        Ver meus ingressos
+                                    </a>
+                                {% endif %}
+                            </p>
                         </div>
                     </div>
                 {% endfor %}

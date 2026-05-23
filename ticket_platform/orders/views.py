@@ -82,7 +82,7 @@ class OrderSuccessView(LoginRequiredMixin, DetailView):
 class MyOrderView(LoginRequiredMixin, ListView):
     model = Order
     template_name = 'orders/my_orders.html'
-    content_object_name = 'orders'
+    context_object_name = 'orders'
     login_url = '/login'
     
     def get_queryset(self):
@@ -92,4 +92,20 @@ class MyOrderView(LoginRequiredMixin, ListView):
             'items',
             'items__ticket_type',
             'items__ticket_type__event'
-        ).order_by('-created_at')    
+        ).order_by('-created_at')
+
+class MyOrderDetailView(LoginRequiredMixin, DetailView):
+    model = Order
+    template_name = 'orders/my_order_detail.html'
+    context_object_name = 'order'
+    login_url = '/login/'
+    
+    def get_queryset(self):
+        return Order.objects.filter(
+            user=self.request.user
+        ).prefetch_related(
+            'items',
+            'items__ticket_type',
+            'items__ticket_type__event',
+            'tickets'
+        )

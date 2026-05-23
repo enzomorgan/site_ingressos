@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}Pedido #{{ order.id }}{% endblock %}
+
+{% block content %}
+    <section class="event-detail">
+        <h1 class="page-title">Pedido #{{ order.id }}</h1>
+
+        <div class="event-meta">
+            <p>
+                <strong>Status:</strong>
+                {% if order.status == 'pending' %}
+                    <span class="status status-pending">Aguardando pagamento</span>
+                {% elif order.status == 'paid' %}
+                    <span class="status status-paid">Pago</span>
+                {% else %}
+                    <span class="status status-canceled">Cancelado</span>
+                {% endif %}
+            </p>
+
+            <p><strong>Total:</strong> R$ {{ order.total }}</p>
+            <p><strong>Data:</strong> {{ order.created_at|date:"d/m/Y H:i" }}</p>
+            <p><strong>Ingressos gerados:</strong> {{ order.tickets.count }}</p>
+        </div>
+
+        {% if order.status == 'pending' %}
+            <div class="alert info">
+                Seu pedido foi criado e está aguardando confirmação de pagamento.
+                Após a confirmação, seus ingressos serão liberados.
+            </div>
+        {% elif order.status == 'paid' %}
+            <div class="alert success">
+                Pagamento confirmado. Seus ingressos já estão disponíveis.
+            </div>
+        {% else %}
+            <div class="alert error">
+                Este pedido foi cancelado.
+            </div>
+        {% endif %}
+
+        <h2>Itens do pedido</h2>
+
+        {% if order.items.all %}
+            <div class="ticket-list">
+                {% for item in order.items.all %}
+                    <div class="ticket-item">
+                        <div>
+                            <h3>{{ item.ticket_type.event.title }}</h3>
+                            <p><strong>Ingresso:</strong> {{ item.ticket_type.name }}</p>
+                            <p><strong>Quantidade:</strong> {{ item.quantity }}</p>
+                            <p><strong>Preço unitário:</strong> R$ {{ item.price }}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-message">
+                Nenhum item encontrado neste pedido.
+            </div>
+        {% endif %}
+
+        <h2 style="margin-top: 28px;">Ingressos gerados</h2>
+
+        {% if order.tickets.all %}
+            <div class="ticket-list">
+                {% for ticket in order.tickets.all %}
+                    <div class="ticket-item">
+                        <div>
+                            <h3>Ingresso #{{ ticket.id }}</h3>
+                            <p><strong>Código:</strong> {{ ticket.code }}</p>
+
+                            <p>
+                                <strong>Check-in:</strong>
+                                {% if ticket.checked_in %}
+                                    <span class="status status-paid">Realizado</span>
+                                {% else %}
+                                    <span class="status status-pending">Pendente</span>
+                                {% endif %}
+                            </p>
+
+                            <p>
+                                <a class="button" href="{% url 'tickets:ticket_detail' ticket.id %}">
+                                    Ver ingresso
+                                </a>
+
+                                {% if ticket.pdf_file %}
+                                    <a class="button" href="{{ ticket.pdf_file.url }}" target="_blank">
+                                        Baixar PDF
+                                    </a>
+                                {% endif %}
+                            </p>
+                        </div>
+
+                        {% if ticket.qr_code %}
+                            <div>
+                                <img src="{{ ticket.qr_code.url }}" alt="QR Code do ingresso" style="max-width: 120px;">
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-message">
+                Nenhum ingresso foi liberado para este pedido ainda.
+            </div>
+        {% endif %}
+
+        <p style="margin-top: 24px;">
+            <a class="button" href="{% url 'orders:my_orders' %}">
+                Voltar para meus pedidos
+            </a>
+
+            {% if order.status == 'paid' %}
+                <a class="button" href="{% url 'tickets:my_tickets' %}">
+                    Ver meus ingressos
+                </a>
+            {% endif %}
+        </p>
+    </section>
+{% endblock %}

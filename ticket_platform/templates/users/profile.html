@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Meu perfil
+{% endblock %}
+
+{% block content %}
+  <section class="event-detail">
+    <h1 class="page-title">Meu perfil</h1>
+
+    <div class="event-meta">
+      <p>
+        <strong>Nome:</strong> {{ user.get_full_name|default:user.username }}
+      </p>
+      <p>
+        <strong>Usuário:</strong> {{ user.username }}
+      </p>
+      <p>
+        <strong>E-mail:</strong> {{ user.email }}
+      </p>
+    </div>
+
+    <p>
+        <a class="button" href="{% url 'users:profile_edit' %}">
+            Editar perfil
+        </a>
+    </p>
+
+    <h2>Resumo da conta</h2>
+
+    <div class="ticket-list">
+      <div class="ticket-item">
+        <div>
+          <h3>Total de pedidos</h3>
+          <p>{{ total_orders }}</p>
+        </div>
+      </div>
+
+      <div class="ticket-item">
+        <div>
+          <h3>Pedidos pagos</h3>
+          <p>{{ paid_orders }}</p>
+        </div>
+      </div>
+
+      <div class="ticket-item">
+        <div>
+          <h3>Pedidos pendentes</h3>
+          <p>{{ pending_orders }}</p>
+        </div>
+      </div>
+
+      <div class="ticket-item">
+        <div>
+          <h3>Ingressos disponíveis</h3>
+          <p>{{ total_tickets }}</p>
+        </div>
+      </div>
+    </div>
+
+    <p style="margin-top: 24px;">
+      <a class="button" href="{% url 'orders:my_orders' %}">Meus pedidos</a>
+
+      <a class="button" href="{% url 'tickets:my_tickets' %}">Meus ingressos</a>
+    </p>
+  </section>
+{% endblock %}

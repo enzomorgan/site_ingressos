@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar perfil{% endblock %}
+
+{% block content %}
+    <section class="event-detail">
+        <h1 class="page-title">Editar perfil</h1>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+
+            {% if form.errors %}
+                <div class="alert error">
+                    Verifique os campos informados.
+                </div>
+            {% endif %}
+
+            <div>
+                <label for="{{ form.first_name.id_for_label }}">Nome</label>
+                {{ form.first_name }}
+                {{ form.first_name.errors }}
+            </div>
+
+            <div>
+                <label for="{{ form.last_name.id_for_label }}">Sobrenome</label>
+                {{ form.last_name }}
+                {{ form.last_name.errors }}
+            </div>
+
+            <div>
+                <label for="{{ form.email.id_for_label }}">E-mail</label>
+                {{ form.email }}
+                {{ form.email.errors }}
+            </div>
+
+            <button type="submit" class="button">
+                Salvar alterações
+            </button>
+
+            <a class="button" href="{% url 'users:profile' %}">
+                Cancelar
+            </a>
+        </form>
+    </section>
+{% endblock %}

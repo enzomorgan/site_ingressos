@@ -1,3 +1,4 @@
+from django.db.models import Q
 from typing import Any
 from tickets.services import send_tickets_email
 from django.contrib import messages
@@ -13,13 +14,11 @@ from orders.models import Order
 from tickets.models import Ticket
 from .forms import EventForm, TicketTypeForm
 
-
 class StaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
     login_url = '/login/'
 
     def test_func(self):
         return self.request.user.is_staff
-
 
 class DashboardHomeView(StaffRequiredMixin, TemplateView):
     template_name = 'dashboard/dashboard_home.html'
@@ -43,11 +42,11 @@ class DashboardHomeView(StaffRequiredMixin, TemplateView):
 
         return context
 
-
 class DashboardOrderListView(StaffRequiredMixin, ListView):
     model = Order
     template_name = 'dashboard/order_list.html'
     context_object_name = 'orders'
+    paginate_by = 10
 
     def get_queryset(self):
         return Order.objects.select_related(
@@ -59,6 +58,44 @@ class DashboardOrderListView(StaffRequiredMixin, ListView):
             'tickets',
         ).order_by('-created_at')
         
+        status = self.request.GET.get('status')
+        search = self.request.GET.get('q')
+        
+        if status in [
+            Order.STATUS_PENDING,
+            Order.STATUS_PAID,
+            Order.STATUS_CANCELED,
+        ]:
+            queryset = queryset.filter(status=status)
+            
+        if search:
+            queryset = queryset.filter(
+                Q(user__username__icontains=search) |
+                Q(user__first_name__icontains=search) |
+                Q(user__last_name__icontains=search) |
+                Q(id__icontains=search)
+            )
+        
+        return queryset
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        context['selected_status'] = self.request.GET.get('status', '')
+        context['search_query'] = self.request.GET.get('q', '')
+        
+        context['total_orders_count'] = Order.objects.count()
+        context['pending_orders_count'] = Order.objects.filter(
+            status=Order.STATUS_PENDING
+        ).count()
+        context['paid_orders_count'] = Order.objects.filter(
+            status=Order.STATUS_PAID
+        ).count()
+        context['canceled_orders_count'] = Order.objects.filter(
+            status=Order.STATUS_CANCELED
+        ).count()
+        
+        return context
 class DashboardOrderDetailView(StaffRequiredMixin, DetailView):
     model = Order
     template_name = 'dashboard/order_detail.html'
@@ -126,6 +163,7 @@ class DashboardEventListView(StaffRequiredMixin, ListView):
     model = Event
     template_name = 'dashboard/event_list.html'
     context_object_name = 'events'
+    paginate_by = 10
 
     def get_queryset(self):
         return Event.objects.select_related(
@@ -133,7 +171,35 @@ class DashboardEventListView(StaffRequiredMixin, ListView):
         ).prefetch_related(
             'tickets'
         ).order_by('-created_at')
+        
+        search = self.request.GET.get('q')
+        status = self.request.GET.get('status')
+        
+        if search:
+            queryset = queryset.filter(
+                Q(title__icontains=search) |
+                Q(location__icontains=search)
+            )
+        
+        if status == 'active':
+            queryset = queryset.filter(active=True)
+            
+        if status == 'inactive':
+            queryset = queryset.filter(active=False)
+            
+        return queryset
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        context['search_query'] = self.request.GET.get('q', '')
+        context['selected_status'] = self.request.GET.get('status', '')
+        
+        context['total_events_count'] = Event.objects.count()
+        context['active_events_count'] = Event.objects.filter(active=True).count()
+        context['inactive_events_count'] = Event.objects.filter(active=False).count()
+        
+        return context
 
 class DashboardEventCreateView(StaffRequiredMixin, CreateView):
     model = Event

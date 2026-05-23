@@ -9,6 +9,74 @@
     <h2>Pedidos</h2>
   </div>
 
+  <div class="cards">
+    <div class="card">
+      <span>Total de pedidos</span>
+      <strong>{{ total_orders_count }}</strong>
+    </div>
+
+    <div class="card">
+      <span>Pendentes</span>
+      <strong>{{ pending_orders_count }}</strong>
+    </div>
+
+    <div class="card">
+      <span>Pagos</span>
+      <strong>{{ paid_orders_count }}</strong>
+    </div>
+
+    <div class="card">
+      <span>Cancelados</span>
+      <strong>{{ canceled_orders_count }}</strong>
+    </div>
+  </div>
+
+  <br>
+
+  <div class="table-card">
+    <form method="get" class="dashboard-filter-form">
+      <div class="form-group">
+        <label for="q">Buscar</label>
+        <input
+          id="q"
+          class="form-control"
+          type="text"
+          name="q"
+          value="{{ search_query }}"
+          placeholder="Pedido, cliente, usuário ou e-mail"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="status">Status</label>
+        <select id="status" class="form-control" name="status">
+          <option value="">Todos</option>
+          <option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>
+            Pendentes
+          </option>
+          <option value="paid" {% if selected_status == 'paid' %}selected{% endif %}>
+            Pagos
+          </option>
+          <option value="canceled" {% if selected_status == 'canceled' %}selected{% endif %}>
+            Cancelados
+          </option>
+        </select>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="button">
+          Filtrar
+        </button>
+
+        <a class="button" href="{% url 'dashboard:order_list' %}">
+          Limpar
+        </a>
+      </div>
+    </form>
+  </div>
+
+  <br>
+
   <div class="table-card">
     {% if orders %}
       <table>
@@ -31,14 +99,14 @@
               <td>#{{ order.id }}</td>
 
               <td>
-                {{ order.user.get_full_name|default:order.user.username }}<br />
+                {{ order.user.get_full_name|default:order.user.username }}<br>
                 <small>{{ order.user.email }}</small>
               </td>
 
               <td>
                 {% for item in order.items.all %}
                   <div>
-                    {{ item.quantity }}x {{ item.ticket_type.name }}<br />
+                    {{ item.quantity }}x {{ item.ticket_type.name }}<br>
                     <small>{{ item.ticket_type.event.title }}</small>
                   </div>
                 {% endfor %}
@@ -58,18 +126,26 @@
 
               <td>{{ order.tickets.count }}</td>
 
-              <td>{{ order.created_at|date:'d/m/Y H:i' }}</td><<td>
-                <a class="button" href="{% url 'dashboard:order_detail' order.id %}">Ver detalhes</a>
+              <td>{{ order.created_at|date:'d/m/Y H:i' }}</td>
+
+              <td>
+                <a class="button" href="{% url 'dashboard:order_detail' order.id %}">
+                  Ver detalhes
+                </a>
 
                 {% if order.status == 'pending' %}
                   <form method="post" action="{% url 'dashboard:confirm_payment' order.id %}" style="display:inline;">
                     {% csrf_token %}
-                    <button type="submit" class="button button-success">Confirmar</button>
+                    <button type="submit" class="button button-success">
+                      Confirmar
+                    </button>
                   </form>
 
                   <form method="post" action="{% url 'dashboard:cancel_order' order.id %}" style="display:inline;">
                     {% csrf_token %}
-                    <button type="submit" class="button button-danger">Cancelar</button>
+                    <button type="submit" class="button button-danger">
+                      Cancelar
+                    </button>
                   </form>
                 {% endif %}
               </td>
@@ -81,4 +157,6 @@
       <p>Nenhum pedido encontrado.</p>
     {% endif %}
   </div>
+
+  {% include 'dashboard/pagination.html' %}
 {% endblock %}
