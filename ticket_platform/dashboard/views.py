@@ -19,6 +19,38 @@ from tickets.models import Ticket
 from tickets.services import send_tickets_email
 from .forms import EventForm, TicketTypeForm
 
+def get_filtered_orders(request):
+    queryset = Order.objects.select_related(
+        'user'
+    ).prefetch_related(
+        'items',
+        'items__ticket_type',
+        'items__ticket_type__event',
+        'tickets',
+    ).order_by('-created_at')
+    
+    status = request.GET.get('status')
+    search = request.GET.get('q')
+    
+    if status in [
+        Order.STATUS_PENDING,
+        Order.STATUS_PAID,
+        Order.STATUS_CANCELED
+    ]:
+        queryset = queryset.filter(status=status)
+    
+    if search:
+        queryset = queryset.filter(
+            Q(user__username__icontains=search) |
+            Q(user__email__icontains=search) |
+            Q(user__first_name__icontains=search) |
+            Q(user__last_name__icontains=search) |
+            Q(id__icontains=search) |
+            Q(items__ticket_type__name__icontains=search) |
+            Q(items__ticket_type__event__title__icontains=search)
+        ).distinct()
+    
+    return queryset
 
 class StaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
     login_url = '/login/'
@@ -55,37 +87,7 @@ class DashboardOrderListView(StaffRequiredMixin, ListView):
     paginate_by = 10
     
     def get_queryset(self):
-        queryset = Order.objects.select_related(
-            'user'
-        ).prefetch_related(
-            'items',
-            'items__ticket_type',
-            'items__ticket_type__event',
-            'tickets',
-        ).order_by('-created_at')
-        
-        status = self.request.GET.get('status')
-        search = self.request.GET.get('q')
-        
-        if status in [
-            Order.STATUS_PENDING,
-            Order.STATUS_PAID,
-            Order.STATUS_CANCELED
-        ]:
-            queryset = queryset.filter(status=status)
-        
-        if search:
-            queryset = queryset.filter(
-                Q(user__username__icontains=search) |
-                Q(user__email__icontains=search) |
-                Q(user__first_name__icontains=search) |
-                Q(user__last_name__icontains=search) |
-                Q(id__icontains=search) |
-                Q(items__ticket_type__name__icontains=search) |
-                Q(items__ticket_type__event__title__icontains=search)
-            ).distinct()
-        
-        return queryset
+        return get_filtered_orders(self.request)
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -360,11 +362,7 @@ class ExportOrdersCSVView(StaffRequiredMixin, View):
             'Data',
         ])
         
-        orders = Order.objects.select_related(
-            'user'
-        ).prefetch_related(
-            'tickets',
-        ).order_by('-created_at')
+        orders = get_filtered_orders(request)
         
         for order in orders:
             writer.writerow([
@@ -421,11 +419,7 @@ class ExportOrdersXLSXView(StaffRequiredMixin, View):
         for col, header in enumerate(headers):
             worksheet.write(0, col, header, header_format)
             
-        orders = Order.objects.select_related(
-            'user'
-        ).prefetch_related(
-            'tickets',
-        ).order_by('-created_at')
+        orders = get_filtered_orders(request)
         
         for row, order in enumerate(orders, start=1):
             worksheet.write(row, 0, order.id, cell_format)
