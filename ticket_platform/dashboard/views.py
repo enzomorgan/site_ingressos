@@ -1,5 +1,7 @@
 import csv
+import xlsxwriter
 from django.http import HttpResponse
+from io import BytesIO
 from typing import Any
 
 from django.contrib import messages
@@ -375,4 +377,83 @@ class ExportOrdersCSVView(StaffRequiredMixin, View):
                 order.created_at.strftime('%d/%m/%Y %H:%M'),
             ])
             
+        return response
+    
+class ExportOrdersXLSXView(StaffRequiredMixin, View):
+    def get(self, request):
+        output = BytesIO()
+        
+        workbook = xlsxwriter.Workbook(output, {'in_memory': True})
+        worksheet = workbook.add_worksheet('Pedidos')
+        
+        header_format = workbook.add_format({
+            'bold': True,
+            'bg_color': '#0f172a',
+            'font_color': '#ffffff',
+            'border': 1,
+            'align': 'center',
+        })
+        
+        money_format = workbook.add_format({
+            'num_format': 'R$ #,##0.00',
+            'border': 1,
+        })
+        
+        date_format = workbook.add_format({
+            'num_format': 'dd/mm/yyyy hh:mm',
+            'border': 1,
+        })
+        
+        cell_format = workbook.add_format({
+            'border': 1,
+        })
+        
+        headers = [
+            'ID',
+            'Cliente',
+            'Email',
+            'Status',
+            'Total',
+            'Ingressos',
+            'Data',
+        ]
+        
+        for col, header in enumerate(headers):
+            worksheet.write(0, col, header, header_format)
+            
+        orders = Order.objects.select_related(
+            'user'
+        ).prefetch_related(
+            'tickets',
+        ).order_by('-created_at')
+        
+        for row, order in enumerate(orders, start=1):
+            worksheet.write(row, 0, order.id, cell_format)
+            worksheet.write(row, 1, order.user.get_full_name() or order.user.username, cell_format)
+            worksheet.write(row, 2, order.user.email, cell_format)
+            worksheet.write(row, 3, order.get_status_display(), cell_format)
+            worksheet.write_number(row, 4, float(order.total), money_format)
+            worksheet.write_number(row, 5, order.tickets.count(), cell_format)
+            worksheet.write_datetime(row, 6, order.created_at.replace(tzinfo=None), date_format)
+            
+        worksheet.set_column('A:A', 10)
+        worksheet.set_column('B:B', 28)
+        worksheet.set_column('C:C', 34)
+        worksheet.set_column('D:D', 16)
+        worksheet.set_column('E:E', 16)
+        worksheet.set_column('F:F', 14)
+        worksheet.set_column('G:G', 22)
+        
+        worksheet.autofilter(0, 0, len(headers), len(headers) - 1)
+        worksheet.freeze_panes(1, 0)
+        
+        workbook.close()
+        output.seek(0)
+        
+        response = HttpResponse(
+            output.read(),
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename="pedidos.xlsx"'
+        
         return response

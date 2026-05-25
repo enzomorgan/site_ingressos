@@ -16,6 +16,7 @@ from .views import (
     CheckinSearchView,
     CheckinValidateView,
     ExportOrdersCSVView,
+    ExportOrdersXLSXView,
 )
 
 app_name = "dashboard"
@@ -51,6 +52,11 @@ urlpatterns = [
         "painel/pedidos/exportar-csv/",
         ExportOrdersCSVView.as_view(),
         name="export_orders_csv",
+    ),
+    path(
+        "painel/pedidos/exportar-xlsx/",
+        ExportOrdersXLSXView.as_view(),
+        name="export_orders_xlsx",
     ),
     path(
         "painel/pedidos/<int:pk>/",
