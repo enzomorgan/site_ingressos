@@ -1,20 +1,21 @@
 from django.urls import path
 
 from .views import (
+    DashboardHomeView,
+    DashboardOrderListView,
+    DashboardOrderDetailView,
+    ConfirmPaymentView,
+    CancelOrderView,
+    DashboardLogoutView,
+    DashboardEventListView,
+    DashboardEventCreateView,
+    DashboardEventUpdateView,
+    DashboardTicketTypeListView,
+    DashboardTicketTypeCreateView,
+    DashboardTicketTypeUpdateView,
     CheckinSearchView,
     CheckinValidateView,
-    CancelOrderView,
-    ConfirmPaymentView,
-    DashboardEventCreateView,
-    DashboardEventListView,
-    DashboardEventUpdateView,
-    DashboardHomeView,
-    DashboardLogoutView,
-    DashboardOrderDetailView,
-    DashboardOrderListView,
-    DashboardTicketTypeCreateView,
-    DashboardTicketTypeListView,
-    DashboardTicketTypeUpdateView,
+    ExportOrdersCSVView,
 )
 
 app_name = "dashboard"
@@ -46,6 +47,11 @@ urlpatterns = [
         name="ticket_type_update",
     ),
     path("painel/pedidos/", DashboardOrderListView.as_view(), name="order_list"),
+    path(
+        "painel/pedidos/exportar-csv/",
+        ExportOrdersCSVView.as_view(),
+        name="export_orders_csv",
+    ),
     path(
         "painel/pedidos/<int:pk>/",
         DashboardOrderDetailView.as_view(),
