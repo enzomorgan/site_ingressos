@@ -17,6 +17,8 @@ from .views import (
     CheckinValidateView,
     ExportOrdersCSVView,
     ExportOrdersXLSXView,
+    ExportEventsCSVView,
+    ExportEventsXLSXView,
 )
 
 app_name = "dashboard"
@@ -24,6 +26,16 @@ app_name = "dashboard"
 urlpatterns = [
     path("painel/", DashboardHomeView.as_view(), name="home"),
     path("painel/eventos/", DashboardEventListView.as_view(), name="event_list"),
+    path(
+        "painel/eventos/exportar-csv/",
+        ExportEventsCSVView.as_view(),
+        name="export_events_csv",
+    ),
+    path(
+        "painel/eventos/exportar-xlsx/",
+        ExportEventsXLSXView.as_view(),
+        name="export_events_xlsx",
+    ),
     path(
         "painel/eventos/novo/", DashboardEventCreateView.as_view(), name="event_create"
     ),

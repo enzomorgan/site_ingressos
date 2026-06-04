@@ -52,6 +52,30 @@ def get_filtered_orders(request):
     
     return queryset
 
+def get_filtered_events(request):
+    queryset = Event.objects.select_related(
+        '-created_by'
+    ).prefetch_related(
+        'tickets'
+    ).order_by('-created_at')
+    
+    search = request.GET.get('q')
+    status = request.GET.get('status')
+    
+    if search:
+        queryset = queryset.filter(
+            Q(title__icontains=search) |
+            Q(location__icontains=search)
+        )
+        
+    if status == 'active':
+        queryset = queryset.filter(active=True)
+        
+    if status == 'inactive':
+        queryset = queryset.filter(active=False)
+        
+    return queryset
+
 class StaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
     login_url = '/login/'
     
@@ -184,28 +208,7 @@ class DashboardEventListView(StaffRequiredMixin, ListView):
     paginate_by = 10
     
     def get_queryset(self):
-        queryset = Event.objects.all().order_by(
-            '-created_by'
-        ).prefetch_related(
-            'tickets'
-        ).order_by('-created_at')
-        
-        search = self.request.GET.get('q')
-        status = self.request.GET.get('status')
-        
-        if search:
-            queryset = queryset.filter(
-                Q(title__icontains=search) |
-                Q(location__icontains=search)
-            )
-            
-        if status == 'active':
-            queryset = queryset.filter(active=True)
-            
-        if status == 'inactive':
-            queryset = queryset.filter(active=False)
-            
-        return queryset
+        return get_filtered_events(self.request)
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -449,5 +452,149 @@ class ExportOrdersXLSXView(StaffRequiredMixin, View):
             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
         response['Content-Disposition'] = 'attachment; filename="pedidos.xlsx"'
+        
+        return response
+    
+class ExportEventsCSVView(StaffRequiredMixin, View):
+    def get(self, request):
+        response = HttpResponse(content_type='text/csv; charset=utf-8')
+        response['Content-Disposition'] = 'attachment; filename="eventos.csv"'
+        
+        response.write('\ufeff')
+        
+        writer = csv.writer(response)
+        
+        writer.writerow([
+            'Evento',
+            'Data',
+            'Local',
+            'Status',
+            'Tipo de ingresso',
+            'Preço',
+            'Quantidade',
+            'Vendidos',
+            'Disponíveis',
+        ])
+        
+        events = get_filtered_events(request)
+        
+        for event in events:
+            ticket_types = event.tickets.all()
+            
+            if ticket_types:
+                for ticket_type in ticket_types:
+                    writer.writerow([
+                        event.title,
+                        event.date.strftime('%d%m/%Y %H:%M'),
+                        event.location,
+                        'Ativo' if event.active else 'Inativo',
+                        ticket_type.name,
+                        ticket_type.price,
+                        ticket_type.quantity,
+                        ticket_type.sold,
+                        ticket_type.available(),
+                    ])
+            else:
+                writer.writerow([
+                    event.title,
+                    event.date.strftime('%d/%m/%Y %H:%M'),
+                    event.location,
+                    'Ativo' if event.active else 'Inativo',
+                    'N/A',
+                    'N/A',
+                    'N/A',
+                    'N/A',
+                    'N/A',
+                ])
+        return response
+    
+class ExportEventsXLSXView(StaffRequiredMixin, View):
+    def get(self, request):
+        output = BytesIO()
+        
+        workbook = xlsxwriter.Workbook(output, {'in_memory': True})
+        worksheet = workbook.add_worksheet('Eventos')
+        
+        header_format = workbook.add_format({
+            'bold': True,
+            'bg_color': '#0f172a',
+            'font_color': '#ffffff',
+            'border': 1,
+            'align': 'center',
+        })
+        
+        money_format = workbook.add_format({
+            'num_format': 'R$ #,##0.00',
+            'border': 1,
+        })
+        
+        date_format = workbook.add_format({
+            'num_format': 'dd/mm/yyyy hh:mm',
+            'border': 1,
+        })
+        
+        cell_format = workbook.add_format({
+            'border': 1,
+        })
+        
+        headers = [
+            'Evento',
+            'Data',
+            'Local',
+            'Status',
+            'Tipo de ingresso',
+            'Preço',
+            'Quantidade',
+            'Vendidos',
+            'Disponíveis',
+        ]
+        
+        for col, header in enumerate(headers):
+            worksheet.write(0, col, header, header_format)
+            
+        events = get_filtered_events(request)
+        
+        row = 1
+        for event in events:
+            ticket_types = event.tickets.all()
+            
+            if ticket_types:
+                for ticket_type in ticket_types:
+                    worksheet.write(row, 0, event.title, cell_format)
+                    worksheet.write_datetime(row, 1, event.date.replace(tzinfo=None), date_format)
+                    worksheet.write(row, 2, event.location, cell_format)
+                    worksheet.write(row, 3, 'Ativo' if event.active else 'Inativo', cell_format)
+                    worksheet.write(row, 4, ticket_type.name, cell_format)
+                    worksheet.write_number(row, 5, float(ticket_type.price), money_format)
+                    worksheet.write_number(row, 6, ticket_type.quantity, cell_format)
+                    worksheet.write_number(row, 7, ticket_type.sold, cell_format)
+                    worksheet.write_number(row, 8, ticket_type.available(), cell_format)
+                    row += 1
+            else:
+                worksheet.write(row, 0, event.title, cell_format)
+                worksheet.write_datetime(row, 1, event.date.replace(tzinfo=None), date_format)
+                worksheet.write(row, 2, event.location, cell_format)
+                worksheet.write(row, 3, 'Ativo' if event.active else 'Inativo', cell_format)
+                row += 1
+
+        worksheet.set_column('A:A', 32)
+        worksheet.set_column('B:B', 22)
+        worksheet.set_column('C:C', 28)
+        worksheet.set_column('D:D', 14)
+        worksheet.set_column('E:E', 24)
+        worksheet.set_column('F:F', 16)
+        worksheet.set_column('G:G', 14)
+        
+        worksheet.set_column(0, 0, row, len(headers) - 1)
+        worksheet.freeze_panes(1, 0)
+        
+        workbook.close()
+        output.seek(0)
+        
+        response = HttpResponse(
+            output.read(),
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename="eventos.xlsx"'
         
         return response

@@ -33,6 +33,9 @@ class Order(models.Model):
     def mark_as_paid(self):
         if self.status == self.STATUS_PAID:
             return
+        
+        if self.status == self.STATUS_CANCELED:
+            raise ValidationError('Não é possível pagar um pedido cancelado.')
 
         with transaction.atomic():
             self.status = self.STATUS_PAID
@@ -42,6 +45,9 @@ class Order(models.Model):
 
     def generate_tickets(self):
         from tickets.models import Ticket
+        
+        if self.tickets.exists():
+            return
 
         for item in self.items.select_related("ticket_type"):
             ticket_type = item.ticket_type

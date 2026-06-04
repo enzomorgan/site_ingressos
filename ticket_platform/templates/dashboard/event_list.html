@@ -9,6 +9,14 @@
         <a class="button" href="{% url 'dashboard:event_create' %}">
             Novo evento
         </a>
+
+        <a class="button" href="{% url 'dashboard:export_events_csv' %}?q={{ search_query }}&status={{ selected_status }}">
+            Exportar CSV
+        </a>
+
+        <a class="button" href="{% url 'dashboard:export_events_xlsx' %}?q={{ search_query }}&status={{ selected_status }}">
+            Exportar XLSX
+        </a>
     </div>
 
     <div class="cards">
