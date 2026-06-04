@@ -54,7 +54,7 @@ def get_filtered_orders(request):
 
 def get_filtered_events(request):
     queryset = Event.objects.select_related(
-        '-created_by'
+        'created_by'
     ).prefetch_related(
         'tickets'
     ).order_by('-created_at')
@@ -115,7 +115,7 @@ class DashboardOrderListView(StaffRequiredMixin, ListView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['status_filter'] = self.request.GET.get('status', '')
+        context['selected_status'] = self.request.GET.get('status', '')
         context['search_query'] = self.request.GET.get('q', '')
         
         context['total_orders_count'] = Order.objects.count()
@@ -311,14 +311,15 @@ class CheckinSearchView(StaffRequiredMixin, TemplateView):
     template_name = 'dashboard/checkin_search.html'
     
 class CheckinValidateView(StaffRequiredMixin, TemplateView):
+    template_name = 'dashboard/checkin_result.html'
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        code = self.request.GET.get('code')
+        code = self.kwargs.GET.get('code')
         
         try: 
             ticket = Ticket.objects.select_related(
-                'oder',
+                'order',
                 'order__user',
             ).prefetch_related(
                 'ticket_type',

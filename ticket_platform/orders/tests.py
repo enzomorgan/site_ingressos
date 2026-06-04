@@ -67,7 +67,7 @@ class OrderFlowTestCase(TestCase):
         )
         
         OrderItem.objects.create(
-            order=Order,
+            order=order,
             ticket_type=self.ticket_type,
             quantity=2,
             price=self.ticket_type.price
@@ -78,7 +78,7 @@ class OrderFlowTestCase(TestCase):
         order.refresh_from_db()
         self.ticket_type.refresh_from_db()
         
-        self.assertEqual(order.status, Order.STATUS_PENDING)
+        self.assertEqual(order.status, Order.STATUS_PAID)
         self.assertEqual(order.tickets.count(), 2)
         self.assertEqual(self.ticket_type.sold, 2)
         
@@ -119,7 +119,7 @@ class OrderFlowTestCase(TestCase):
             price=self.ticket_type.price
         )
         
-        with self.assertEqual(ValidationError):
+        with self.assertRaises(ValidationError):
             order.mark_as_paid()
             
         order.refresh_from_db()
