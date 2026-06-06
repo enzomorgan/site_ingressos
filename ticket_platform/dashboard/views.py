@@ -315,15 +315,16 @@ class CheckinValidateView(StaffRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        code = self.kwargs.GET.get('code')
+        code = self.kwargs.get('code')
         
         try: 
             ticket = Ticket.objects.select_related(
                 'order',
                 'order__user',
             ).prefetch_related(
-                'ticket_type',
-                'ticket_type__event',
+                'order__items',
+                'order__items__ticket_type',
+                'order__items__ticket_type__event',
             ).get(code=code)
         except Ticket.DoesNotExist:
             context['status'] = 'invalid'
@@ -486,7 +487,7 @@ class ExportEventsCSVView(StaffRequiredMixin, View):
                 for ticket_type in ticket_types:
                     writer.writerow([
                         event.title,
-                        event.date.strftime('%d%m/%Y %H:%M'),
+                        event.date.strftime('%d/%m/%Y %H:%M'),
                         event.location,
                         'Ativo' if event.active else 'Inativo',
                         ticket_type.name,

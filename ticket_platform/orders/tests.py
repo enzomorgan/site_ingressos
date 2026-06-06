@@ -90,7 +90,7 @@ class OrderFlowTestCase(TestCase):
         )
         
         OrderItem.objects.create(
-            order=Order,
+            order=order,
             ticket_type=self.ticket_type,
             quantity=2,
             price=self.ticket_type.price
@@ -103,7 +103,7 @@ class OrderFlowTestCase(TestCase):
         self.ticket_type.refresh_from_db()
         
         self.assertEqual(order.tickets.count(), 2)
-        self.assertEqual(order.tickets.count(), 3)
+        self.assertEqual(order.tickets.count(), 2)
         
     def test_canceled_order_cannot_be_paid(self):
         order = Order.objects.create(
